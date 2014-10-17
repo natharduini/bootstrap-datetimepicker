@@ -11,6 +11,13 @@
 
 This project is a fork of [bootstrap-datepicker project](https://github.com/eternicode/bootstrap-datepicker).
 
+Modifications:
+
+ 1) Make the **todayBtn** option work as described in the doc (false = no button, true = browse to today view, 'linked' = affect the input)
+ 
+ 2) New option: **showWeek** that shows an extra column with the week number
+ 
+ 3) Month View: add a "day" class and invisible" AM and PM divs in the Day divs to be able to apply styles
 
 # Home
 
