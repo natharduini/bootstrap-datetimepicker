@@ -11,7 +11,10 @@
 
 This project is a fork of [bootstrap-datepicker project](https://github.com/eternicode/bootstrap-datepicker).
 
-Modifications (natharduini):
+
+### Modifications (natharduini):
+
+This project is a fork of [bootstrap-datetimepicker project](https://github.com/smalot/bootstrap-datetimepicker).
 
  1) Make the **todayBtn** option work as described in the doc (false = no button, true = browse to today view, 'linked' = affect the input)
  
