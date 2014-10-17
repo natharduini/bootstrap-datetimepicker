@@ -26,6 +26,13 @@
  *
  * Make it work in bootstrap v3
  */
+/*
+ * Improvement by Nath Arduini and Mario Santos
+ *
+ * 1) Make the todayBtn option work as described in the doc (false = no button, true = browse to today view, 'linked' = affect the input)
+ * 2) New option: showWeek that shows an extra column with the week number
+ * 3) Month View: add a "day" class and invisible" AM and PM divs in the Day divs to be able to apply styles
+ */
 
 !function ($) {
 
@@ -73,6 +80,8 @@
 		this.pickerPosition = options.pickerPosition || this.element.data('picker-position') || 'bottom-right';
 		this.showMeridian = options.showMeridian || this.element.data('show-meridian') || false;
 		this.initialDate = options.initialDate || new Date();
+
+		this.showWeek = options.showWeek || false;
 
 		this.icons = {
 			leftArrow: this.fontAwesome ? 'fa-arrow-left' : (this.bootcssVer === 3 ? 'glyphicon-arrow-left' : 'icon-arrow-left'),
@@ -150,7 +159,8 @@
 		} else if ('dateForceParse' in this.element.data()) {
 			this.forceParse = this.element.data('date-force-parse');
 		}
-		var template = this.bootcssVer === 3 ? DPGlobal.templateV3 : DPGlobal.template;
+		
+		var template = this.bootcssVer === 3 ? (this.showWeek ? DPGlobal.templateV3WithWeek : DPGlobal.templateV3) : (this.showWeek ? DPGlobal.templateWithWeek : DPGlobal.template);
 		while (template.indexOf('{iconType}') !== -1) {
 			template = template.replace('{iconType}', this.icontype);
 		}
@@ -333,7 +343,7 @@
 				date: this.date
 			});
 		},
-
+			
 		remove: function () {
 			this._detachEvents();
 			this.picker.remove();
@@ -540,7 +550,7 @@
 
 		fillDow: function () {
 			var dowCnt = this.weekStart,
-				html = '<tr>';
+				html = this.showWeek ? '<tr><th class="week_label">#</th>' : '<tr>';
 			while (dowCnt < this.weekStart + 7) {
 				html += '<th class="dow">' + dates[this.language].daysMin[(dowCnt++) % 7] + '</th>';
 			}
@@ -573,6 +583,7 @@
 				endMonth = this.endDate !== Infinity ? this.endDate.getUTCMonth() + 1 : Infinity,
 				currentDate = (new UTCDate(this.date.getUTCFullYear(), this.date.getUTCMonth(), this.date.getUTCDate())).valueOf(),
 				today = new Date();
+				
 			this.picker.find('.datetimepicker-days thead th:eq(1)')
 				.text(dates[this.language].months[month] + ' ' + year);
 			if (this.formatViewType == "time") {
@@ -585,9 +596,12 @@
 				this.picker.find('.datetimepicker-minutes thead th:eq(1)')
 					.text(dayMonth + ' ' + dates[this.language].months[month] + ' ' + year);
 			}
-			this.picker.find('tfoot th.today')
-				.text(dates[this.language].today)
-				.toggle(this.todayBtn !== false);
+			this.picker.find('tfoot th.today').text(dates[this.language].today);
+			if (this.todayBtn === true) {
+				this.picker.find('tfoot th.today').show();
+			} else {
+				this.picker.find('tfoot th.today').hide();
+			}
 			this.updateNavArrows();
 			this.fillMonths();
 			/*var prevMonth = UTCDate(year, month, 0,0,0,0,0);
@@ -599,11 +613,19 @@
 			var nextMonth = new Date(prevMonth);
 			nextMonth.setUTCDate(nextMonth.getUTCDate() + 42);
 			nextMonth = nextMonth.valueOf();
+			
 			var html = [];
 			var clsName;
+			
 			while (prevMonth.valueOf() < nextMonth) {
+				var tmp = moment(prevMonth);
+				
 				if (prevMonth.getUTCDay() == this.weekStart) {
-					html.push('<tr>');
+					if (this.showWeek) {
+						html.push('<tr><td class="week_nr"><div class="number">'+tmp.week()+'<div></td>');
+					} else {
+						html.push('<tr>');
+					}
 				}
 				clsName = '';
 				if (prevMonth.getUTCFullYear() < year || (prevMonth.getUTCFullYear() == year && prevMonth.getUTCMonth() < month)) {
@@ -625,10 +647,13 @@
 					$.inArray(prevMonth.getUTCDay(), this.daysOfWeekDisabled) !== -1) {
 					clsName += ' disabled';
 				}
-				html.push('<td class="day' + clsName + '">' + prevMonth.getUTCDate() + '</td>');
+				//added day class && dividers
+				html.push('<td class="day' + clsName + ' day-'+prevMonth.getUTCDate()+'"><div class="number">' + prevMonth.getUTCDate() + '</div><div class="am"></div><div class="pm"></div></td>');
+				
 				if (prevMonth.getUTCDay() == this.weekEnd) {
 					html.push('</tr>');
 				}
+				
 				prevMonth.setUTCDate(prevMonth.getUTCDate() + 1);
 			}
 			this.picker.find('.datetimepicker-days tbody').empty().append(html.join(''));
@@ -736,6 +761,17 @@
 			}
 			yearCont.html(html);
 			this.place();
+			
+			//add the month to the cell
+			var d_tmp = new Date(this.viewDate);
+			year_tmp = d_tmp.getUTCFullYear();
+			month_tmp = d_tmp.getUTCMonth();
+			this.picker.find('.datetimepicker-days').attr("data-month", (month_tmp+1));
+			this.element.trigger({
+				type:      'monthChanged',
+				month:     (month_tmp+1),				
+				year:      year_tmp,				
+			}); //trigger the event that month has changed
 		},
 
 		updateNavArrows: function () {
@@ -834,7 +870,7 @@
 
 			setTimeout($.proxy(function () {
 
-				this.wheelPause = false
+				this.wheelPause = false;
 
 			}, this), this.wheelViewModeNavigationDelay);
 
@@ -890,19 +926,30 @@
 								});
 								break;
 							case 'today':
-								var date = new Date();
-								date = UTCDate(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), 0);
-
-								// Respect startDate and endDate.
-								if (date < this.startDate) date = this.startDate;
-								else if (date > this.endDate) date = this.endDate;
-
-								this.viewMode = this.startViewMode;
-								this.showMode(0);
-								this._setDate(date);
-								this.fill();
-								if (this.autoclose) {
-									this.hide();
+								if (this.todayBtn == 'linked') {
+									var date = new Date();
+									date = UTCDate(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), 0);
+	
+									// Respect startDate and endDate.
+									if (date < this.startDate) date = this.startDate;
+									else if (date > this.endDate) date = this.endDate;
+	
+									this.viewMode = this.startViewMode;
+									this.showMode(0);
+									this._setDate(date);
+									this.fill();
+									if (this.autoclose) {
+										this.hide();
+									}
+								} else {
+									this.viewDate = new Date();
+									this.fill();
+									this.element.trigger({
+										type:      target[0].className + ':' + this.convertViewModeText(this.viewMode),
+										date:      this.viewDate,
+										startDate: this.startDate,
+										endDate:   this.endDate
+									});
 								}
 								break;
 						}
@@ -1372,10 +1419,10 @@
 			}
 		],
 		isLeapYear:       function (year) {
-			return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0))
+			return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
 		},
 		getDaysInMonth:   function (year, month) {
-			return [31, (DPGlobal.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month]
+			return [31, (DPGlobal.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
 		},
 		getDefaultFormat: function (type, field) {
 			if (type == "standard") {
@@ -1394,9 +1441,9 @@
 		},
 		validParts:       function (type) {
 			if (type == "standard") {
-				return /hh?|HH?|p|P|ii?|ss?|dd?|DD?|mm?|MM?|yy(?:yy)?/g;
+				return (/hh?|HH?|p|P|ii?|ss?|dd?|DD?|mm?|MM?|yy(?:yy)?/g);
 			} else if (type == "php") {
-				return /[dDjlNwzFmMnStyYaABgGhHis]/g;
+				return (/[dDjlNwzFmMnStyYaABgGhHis]/g);
 			} else {
 				throw new Error("Invalid format type.");
 			}
@@ -1544,7 +1591,7 @@
 				for (var i = 0, s; i < setters_order.length; i++) {
 					s = setters_order[i];
 					if (s in parsed && !isNaN(parsed[s]))
-						setters_map[s](date, parsed[s])
+						setters_map[s](date, parsed[s]);
 				}
 			}
 			return date;
@@ -1672,6 +1719,13 @@
 							  '<th class="next"><i class="{rightArrow}"/></th>' +
 							  '</tr>' +
 			'</thead>',
+		headTemplateWithWeek:     '<thead>' +
+								'<tr>' +
+								'<th class="prev"><i class="{leftArrow}"/></th>' +
+								'<th colspan="6" class="switch"></th>' +
+								'<th class="next"><i class="{rightArrow}"/></th>' +
+								'</tr>' +
+								'</thead>',
 		headTemplateV3:   '<thead>' +
 							  '<tr>' +
 							  '<th class="prev"><span class="{iconType} {leftArrow}"></span> </th>' +
@@ -1679,8 +1733,17 @@
 							  '<th class="next"><span class="{iconType} {rightArrow}"></span> </th>' +
 							  '</tr>' +
 			'</thead>',
+			headTemplateV3WithWeek:   '<thead>' +
+								'<tr>' +
+								'<th class="prev"><span class="{iconType} {leftArrow}"></span> </th>' +
+								'<th colspan="6" class="switch"></th>' +
+								'<th class="next"><span class="{iconType} {rightArrow}"></span> </th>' +
+								'</tr>' +
+								'</thead>',
 		contTemplate:     '<tbody><tr><td colspan="7"></td></tr></tbody>',
-		footTemplate:     '<tfoot><tr><th colspan="7" class="today"></th></tr></tfoot>'
+		contTemplateWithWeek:     '<tbody><tr><td colspan="8"></td></tr></tbody>',
+		footTemplate:     '<tfoot><tr><th colspan="7" class="today"></th></tr></tfoot>',
+		footTemplateWithWeek:     '<tfoot><tr><th colspan="8" class="today"></th></tr></tfoot>'
 	};
 	DPGlobal.template = '<div class="datetimepicker">' +
 		'<div class="datetimepicker-minutes">' +
@@ -1719,6 +1782,43 @@
 		'</table>' +
 		'</div>' +
 		'</div>';
+	DPGlobal.templateWithWeek = '<div class="datetimepicker">' +
+		'<div class="datetimepicker-minutes">' +
+		'<table class=" table-condensed">' +
+		DPGlobal.headTemplateWithWeek +
+		DPGlobal.contTemplateWithWeek +
+		DPGlobal.footTemplateWithWeek +
+		'</table>' +
+		'</div>' +
+		'<div class="datetimepicker-hours">' +
+		'<table class=" table-condensed">' +
+		DPGlobal.headTemplateWithWeek +
+		DPGlobal.contTemplateWithWeek +
+		DPGlobal.footTemplateWithWeek +
+		'</table>' +
+		'</div>' +
+		'<div class="datetimepicker-days">' +
+		'<table class=" table-condensed">' +
+		DPGlobal.headTemplateWithWeek +
+		'<tbody></tbody>' +
+		DPGlobal.footTemplateWithWeek +
+		'</table>' +
+		'</div>' +
+		'<div class="datetimepicker-months">' +
+		'<table class="table-condensed">' +
+		DPGlobal.headTemplateWithWeek +
+		DPGlobal.contTemplateWithWeek +
+		DPGlobal.footTemplateWithWeek +
+		'</table>' +
+		'</div>' +
+		'<div class="datetimepicker-years">' +
+		'<table class="table-condensed">' +
+		DPGlobal.headTemplateWithWeek +
+		DPGlobal.contTemplateWithWeek +
+		DPGlobal.footTemplateWithWeek +
+		'</table>' +
+		'</div>' +
+		'</div>';
 	DPGlobal.templateV3 = '<div class="datetimepicker">' +
 		'<div class="datetimepicker-minutes">' +
 		'<table class=" table-condensed">' +
@@ -1753,6 +1853,43 @@
 		DPGlobal.headTemplateV3 +
 		DPGlobal.contTemplate +
 		DPGlobal.footTemplate +
+		'</table>' +
+		'</div>' +
+		'</div>';
+	DPGlobal.templateV3WithWeek = '<div class="datetimepicker">' +
+		'<div class="datetimepicker-minutes">' +
+		'<table class=" table-condensed">' +
+		DPGlobal.headTemplateV3WithWeek +
+		DPGlobal.contTemplateWithWeek +
+		DPGlobal.footTemplateWithWeek +
+		'</table>' +
+		'</div>' +
+		'<div class="datetimepicker-hours">' +
+		'<table class=" table-condensed">' +
+		DPGlobal.headTemplateV3WithWeek +
+		DPGlobal.contTemplateWithWeek +
+		DPGlobal.footTemplateWithWeek +
+		'</table>' +
+		'</div>' +
+		'<div class="datetimepicker-days">' +
+		'<table class=" table-condensed">' +
+		DPGlobal.headTemplateV3WithWeek +
+		'<tbody></tbody>' +
+		DPGlobal.footTemplateWithWeek +
+		'</table>' +
+		'</div>' +
+		'<div class="datetimepicker-months">' +
+		'<table class="table-condensed">' +
+		DPGlobal.headTemplateV3WithWeek +
+		DPGlobal.contTemplateWithWeek +
+		DPGlobal.footTemplateWithWeek +
+		'</table>' +
+		'</div>' +
+		'<div class="datetimepicker-years">' +
+		'<table class="table-condensed">' +
+		DPGlobal.headTemplateV3WithWeek +
+		DPGlobal.contTemplateWithWeek +
+		DPGlobal.footTemplateWithWeek +
 		'</table>' +
 		'</div>' +
 		'</div>';
