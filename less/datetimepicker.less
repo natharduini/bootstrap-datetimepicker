@@ -416,3 +416,69 @@
     height: 14px;
 }
 
+/* extra AM/PM markup for month view */
+.datetimepicker {
+    .datetimepicker-days {
+        .day, .week_nr {
+            position: relative;
+            padding: 5px;
+            padding-right: 0;
+            padding-left: 0;
+
+            .number {
+                z-index: 10;
+                position: absolute;
+                top: 1px;
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        .day {
+            .am {
+                z-index: 8;
+                position: absolute;
+                top: 0;
+                width: 100%;
+                height: 10px;
+                opacity: 0.3;
+                -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30) ";
+                filter: alpha(opacity=30);
+                -moz-opacity: 0.3;
+                -khtml-opacity: 0.3;
+            }
+
+            .pm {
+                z-index: 9;
+                position: absolute;
+                top: 10px;
+                width: 100%;
+                height: 10px;
+                opacity: 0.3;
+                -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30) ";
+                filter: alpha(opacity=30);
+                -moz-opacity: 0.3;
+                -khtml-opacity: 0.3;
+            }
+        }
+
+        .week_nr .number {
+            margin-bottom: 8px;
+            border-right: solid 2px #ffffff;
+            opacity: 0.7;
+            background-color: #EEEEEE;
+            -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70) ";
+            filter: alpha(opacity=70);
+            -moz-opacity: 0.7;
+            -khtml-opacity: 0.7;
+        }
+
+        .day.active {
+            opacity: 0.8;
+            -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80) ";
+            filter: alpha(opacity=80);
+            -moz-opacity: 0.8;
+            -khtml-opacity: 0.8;
+        }
+    }
+}
