@@ -1104,16 +1104,18 @@
 			} else if (this.component) {
 				element = this.element.find('input');
 			}
-			if (element && (!which || which == 'date')) {
+			if (element) {
 				element.change();
 				if (this.autoclose && (!which || which == 'date')) {
 					//this.hide();
 				}
 			}
-			this.element.trigger({
-				type: 'changeDate',
-				date: this.date
-			});
+			if (!which || which == 'date') {
+				this.element.trigger({
+					type: 'changeDate',
+					date: this.date
+				});
+			}
 		},
 
 		moveMinute: function (date, dir) {
