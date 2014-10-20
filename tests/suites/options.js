@@ -173,7 +173,7 @@ test('Today Button: moves to today\'s date', function(){
                 .val('2012-03-05')
                 .datetimepicker({
                     format: 'yyyy-mm-dd',
-                    todayBtn: true
+                    todayBtn: 'linked'
                 }),
         dp = input.data('datetimepicker'),
         picker = dp.picker,
@@ -181,7 +181,7 @@ test('Today Button: moves to today\'s date', function(){
 
         input.focus();
         ok(picker.find('.datetimepicker-days').is(':visible'), 'Days view visible');
-        ok(picker.find('.datetimepicker-days tfoot .today').is(':visible'), 'Today button visible');
+        ok(picker.find('.datetimepicker-days tfoot tr .today').is(':visible'), 'Today button visible');
 
         target = picker.find('.datetimepicker-days tfoot .today');
         target.click();
@@ -286,6 +286,24 @@ test('DaysOfWeekDisabled', function(){
     ok(!target.hasClass('disabled'), 'Day of week is enabled');
     target = picker.find('.datetimepicker-days tbody td:nth(26)');
     ok(target.hasClass('disabled'), 'Day of week is disabled');
+});
+
+test('ShowWeekEnabled', function(){
+    var input = $('<input />')
+                .appendTo('#qunit-fixture')
+                .val('2012-10-26')
+                .datetimepicker({
+                    format: 'yyyy-mm-dd',
+                    showWeek: true
+                }),
+        dp = input.data('datetimepicker'),
+        picker = dp.picker,
+        target;
+
+
+    input.focus();
+    target = picker.find('.datetimepicker-days tbody td.week_nr');
+    ok(target.length > 0, 'Week numbers are displayed');
 });
 
 test('startDate: Custom value', function(){

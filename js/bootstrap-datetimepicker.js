@@ -216,7 +216,7 @@
 			this.keyboardNavigation = this.element.data('date-keyboard-navigation');
 		}
 
-		this.todayBtn = (options.todayBtn || this.element.data('date-today-btn') || false);
+		this.todayBtn = (options.todayBtn || options.todayBtn == 'linked' || this.element.data('date-today-btn') || false);
 		this.todayHighlight = (options.todayHighlight || this.element.data('date-today-highlight') || false);
 
 		this.weekStart = ((options.weekStart || this.element.data('date-weekstart') || dates[this.language].weekStart || 0) % 7);
@@ -597,7 +597,7 @@
 					.text(dayMonth + ' ' + dates[this.language].months[month] + ' ' + year);
 			}
 			this.picker.find('tfoot th.today').text(dates[this.language].today);
-			if (this.todayBtn === true) {
+			if (this.todayBtn === true || this.todayBtn === 'linked') {
 				this.picker.find('tfoot th.today').show();
 			} else {
 				this.picker.find('tfoot th.today').hide();
