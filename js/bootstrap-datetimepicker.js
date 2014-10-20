@@ -618,10 +618,10 @@
 			var clsName;
 			
 			while (prevMonth.valueOf() < nextMonth) {
-				var tmp = moment(prevMonth);
 				
 				if (prevMonth.getUTCDay() == this.weekStart) {
 					if (this.showWeek) {
+						var tmp = moment(prevMonth);
 						html.push('<tr><td class="week_nr"><div class="number">'+tmp.week()+'<div></td>');
 					} else {
 						html.push('<tr>');
