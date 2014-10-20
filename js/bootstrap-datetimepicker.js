@@ -219,6 +219,18 @@
 		this.todayBtn = (options.todayBtn || options.todayBtn == 'linked' || this.element.data('date-today-btn') || false);
 		this.todayHighlight = (options.todayHighlight || this.element.data('date-today-highlight') || false);
 
+		if (options.noInputFocusOpen) {
+			for (var i = 0, el; i < this._events.length; i++) {
+				el = this._events[i][0];
+				if (el.is('input')) {
+					el.off('focus');
+				}
+			}
+		}
+
+		// syncWithInput: if true, always open with the input date (if set)
+		this.syncWithInput = (options.syncWithInput || false);
+
 		this.weekStart = ((options.weekStart || this.element.data('date-weekstart') || dates[this.language].weekStart || 0) % 7);
 		this.weekEnd = ((this.weekStart + 6) % 7);
 		this.startDate = -Infinity;
@@ -312,6 +324,13 @@
 				e.preventDefault();
 			}
 			this.isVisible = true;
+
+			if (this.syncWithInput && 
+				(this.isInput && this.element.val() || this.hasInput && this.element.find('input').val())
+			) {
+				this._setDate(this.date, 'view');
+				this.fill();
+			}
 			this.element.trigger({
 				type: 'show',
 				date: this.date
@@ -1085,7 +1104,7 @@
 			} else if (this.component) {
 				element = this.element.find('input');
 			}
-			if (element) {
+			if (element && (!which || which == 'date')) {
 				element.change();
 				if (this.autoclose && (!which || which == 'date')) {
 					//this.hide();
