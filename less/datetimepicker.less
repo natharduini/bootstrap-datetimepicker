@@ -421,9 +421,15 @@
     .datetimepicker-days {
         .day, .week_nr {
             position: relative;
-            padding: 5px;
-            padding-right: 0;
-            padding-left: 0;
+            vertical-align: top;
+            padding: 0;
+            
+            &  > div {
+                position: relative;
+                padding: 5px;
+                padding-left: 0px;
+                padding-right: 0px;
+            }
 
             .number {
                 z-index: 10;

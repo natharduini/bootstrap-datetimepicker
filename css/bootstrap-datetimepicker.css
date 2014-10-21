@@ -418,7 +418,14 @@
 }
 
 /* extra AM/PM markup for month view */
-.datetimepicker .datetimepicker-days .day, .datetimepicker .datetimepicker-days .week_nr {
+.datetimepicker .datetimepicker-days .day,
+.datetimepicker .datetimepicker-days .week_nr {
+	position: relative;
+	vertical-align: top;
+	padding: 0;
+}
+.datetimepicker .datetimepicker-days .day > div,
+.datetimepicker .datetimepicker-days .week_nr  > div {
 	position: relative;
 	padding: 5px;
 	padding-left: 0px;

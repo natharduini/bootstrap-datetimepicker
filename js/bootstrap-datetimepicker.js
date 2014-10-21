@@ -640,7 +640,7 @@
 				
 				if (prevMonth.getUTCDay() == this.weekStart) {
 					if (this.showWeek) {
-						html.push('<tr><td class="week_nr"><div class="number">'+this.getWeekNumber(prevMonth)+'<div></td>');
+						html.push('<tr><td class="week_nr"><div><div class="number">'+this.getWeekNumber(prevMonth)+'</div></div></td>');
 					} else {
 						html.push('<tr>');
 					}
@@ -666,7 +666,7 @@
 					clsName += ' disabled';
 				}
 				//added day class && dividers
-				html.push('<td class="day' + clsName + ' day-'+prevMonth.getUTCDate()+'"><div class="number">' + prevMonth.getUTCDate() + '</div><div class="am"></div><div class="pm"></div></td>');
+				html.push('<td class="day' + clsName + ' day-'+prevMonth.getUTCDate()+'"><div><div class="number">' + prevMonth.getUTCDate() + '</div><div class="am"></div><div class="pm"></div></div></td>');
 				
 				if (prevMonth.getUTCDay() == this.weekEnd) {
 					html.push('</tr>');
